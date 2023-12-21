@@ -27,9 +27,9 @@ func DoTrans(apiKey string, openaiBody model.ChatGPTRequestBody, c *gin.Context)
 	lastMsg := ""
 	for i, msg := range openaiBody.Messages {
 		// 忽略 chat-next-web的默认提示词
-		if msg.Role == "system" {
-			continue
-		}
+// 		if msg.Role == "system" {
+// 			continue
+// 		}
 		content := msg.Content
 		// 将assistant角色替换为model
 		role := "user"
@@ -41,7 +41,15 @@ func DoTrans(apiKey string, openaiBody model.ChatGPTRequestBody, c *gin.Context)
 			lastMsg = content
 			break
 		}
-		cs.History = append(cs.History, &genai.Content{Parts: []genai.Part{genai.Text(content)}, Role: role})
+		if msg.Role == "system" {
+			// 将system对话转换为特定格式的指令
+			content = "====INSTRUCTION START==== " + content + " ====INSTRUCTION END===="
+			// 将system对话插入到user对话的最前端
+			cs.History = append([]*genai.Content{&genai.Content{Parts: []genai.Part{genai.Text(content)}, Role: role}}, cs.History...)
+		} else {
+			cs.History = append(cs.History, &genai.Content{Parts: []genai.Part{genai.Text(content)}, Role: role})
+		}
+// 		cs.History = append(cs.History, &genai.Content{Parts: []genai.Part{genai.Text(content)}, Role: role})
 	}
 
 	if openaiBody.Stream {
