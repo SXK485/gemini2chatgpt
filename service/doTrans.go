@@ -28,7 +28,8 @@ func DoTrans(apiKey string, openaiBody model.ChatGPTRequestBody, c *gin.Context)
 	for i, msg := range openaiBody.Messages {
 		// 忽略 chat-next-web的默认提示词
 		if msg.Role == "system" {
-			continue
+			// continue
+			msg.Role = "user"
 		}
 		content := msg.Content
 		// 将assistant角色替换为model
